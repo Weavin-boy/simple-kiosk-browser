@@ -6,23 +6,29 @@ Built with [Electron](https://www.electronjs.org/).
 
 ## What it does
 - No address bar, tabs, bookmarks, or buttons
-- Locks to the website in `config.json`
-- F11 = fullscreen
+- Locks to the website in `config.json` (origin-checked; only `https://` allowed)
+- F11 = fullscreen (only while the window is focused)
 - F12 = screenshot (saved next to the app)
-- Ctrl/Cmd + C = Copy
-- Ctrl/Cmd + V = Paste
-- Ctrl/Cmd + X = Cut
-- Ctrl/Cmd + A = Select All
+- Ctrl/Cmd + C/V/X/A = clipboard
+- Right-click drag locks the pointer (for games)
 - Fully portable — just unzip and run
 
-Clipboard access (Clipboard API) is enabled for the locked page.
+Clipboard, pointer lock, and keyboard lock are granted only for the locked origin.
+
+**Note:** “Locked” means navigation is restricted to the configured origin. Modifier keys are allowed so games can use them.
+
+Data (cookies, session, screenshots) is stored unencrypted next to the executable in a `data/` and `screenshots/` folder. This is normal for a portable app.
 
 ## Download
 Get the latest Windows version here:
 
 **https://github.com/Weavin-boy/locked-browser/releases**
 
-Unzip the file, edit `config.json`, then run `Locked Browser.exe`.
+Each release includes a SHA-256 of the zip so you can verify the download.
+
+Unzip the file, edit `config.json` (must be a valid `https://` URL), then run `Locked Browser.exe`.
+
+The app does not auto-update. Check the releases page for new builds.
 
 ## Build it yourself
 1. Install Node.js
@@ -33,7 +39,7 @@ Unzip the file, edit `config.json`, then run `Locked Browser.exe`.
    ```
 3. Install and run:
    ```bash
-   npm install
+   npm ci
    npm start
    ```
 4. To make the portable Windows build:

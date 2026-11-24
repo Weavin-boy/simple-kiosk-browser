@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g. 1.0.1)'
+        description: 'Version to release (e.g. 1.0.3)'
         required: true
-        default: '1.0.1'
+        default: '1.0.3'
 
 permissions:
   contents: write
@@ -25,10 +25,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 21
+          node-version: 22
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build portable app
         run: npm run build:win
@@ -50,11 +50,24 @@ jobs:
           Compress-Archive -Path "dist\output\Locked-Browser" -DestinationPath "dist\Locked-Browser-Portable.zip" -Force
         shell: pwsh
 
+      - name: Compute SHA-256
+        id: sha
+        run: |
+          $hash = (Get-FileHash -Path "dist\Locked-Browser-Portable.zip" -Algorithm SHA256).Hash.ToLower()
+          "sha256=$hash" >> $env:GITHUB_OUTPUT
+          Write-Host "SHA-256: $hash"
+        shell: pwsh
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || github.ref_name }}
           name: Locked Browser ${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || github.ref_name }}
+          body: |
+            SHA-256 of Locked-Browser-Portable.zip:
+            `${{ steps.sha.outputs.sha256 }}`
+
+            **Full Changelog**: https://github.com/Weavin-boy/locked-browser/compare/${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || github.ref_name }}...HEAD
           files: dist/Locked-Browser-Portable.zip
           generate_release_notes: true
         env:
