@@ -117,6 +117,11 @@ function createWindow() {
     return { action: 'deny' };
   });
 
+  // Prevent the default context menu so right-click drag stays clean
+  mainWindow.webContents.on('context-menu', (event) => {
+    event.preventDefault();
+  });
+
   mainWindow.webContents.on('before-input-event', (event, input) => {
     const { key, control, alt, meta, shift } = input;
 
@@ -131,7 +136,6 @@ function createWindow() {
     }
 
     // Allow all Ctrl/Cmd, Alt, and Shift (and combinations) so the page receives them
-    // This enables clipboard shortcuts, page shortcuts, and modifier keys
     if (control || meta || alt || shift) {
       return;
     }
@@ -153,6 +157,7 @@ function createWindow() {
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.webContents.executeJavaScript(`
       (function() {
+        // Gamepad support (existing)
         let lastButtons = [];
         function pollGamepad() {
           const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
@@ -171,8 +176,46 @@ function createWindow() {
         }
         window.addEventListener('gamepadconnected', () => console.log('Gamepad connected'));
         pollGamepad();
+
+        // Auto pointer lock on right-click so mouse stays locked during drag (games)
+        let rightButtonDown = false;
+
+        document.addEventListener('mousedown', (e) => {
+          if (e.button === 2) {
+            rightButtonDown = true;
+            e.preventDefault();
+            const target = (e.target && e.target.requestPointerLock) ? e.target : document.body;
+            if (target && target.requestPointerLock) {
+              target.requestPointerLock().catch(() => {
+                // Fallback if target fails
+                document.body.requestPointerLock().catch(() => {});
+              });
+            }
+          }
+        }, true);
+
+        document.addEventListener('mouseup', (e) => {
+          if (e.button === 2 && rightButtonDown) {
+            rightButtonDown = false;
+            if (document.pointerLockElement) {
+              document.exitPointerLock();
+            }
+          }
+        }, true);
+
+        document.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+        }, true);
+
+        // Also exit lock if the button is released outside or window blurs
+        window.addEventListener('blur', () => {
+          if (document.pointerLockElement) {
+            document.exitPointerLock();
+          }
+          rightButtonDown = false;
+        });
       })();
-    `).catch(err => console.error('Failed to inject gamepad support:', err));
+    `).catch(err => console.error('Failed to inject scripts:', err));
   });
 
   mainWindow.on('closed', () => {
@@ -183,9 +226,15 @@ function createWindow() {
 app.whenReady().then(() => {
   loadConfig();
 
-  // Grant clipboard permissions so the locked page can use the Clipboard API
+  // Grant clipboard + pointer lock so games can lock the mouse
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    if (permission === 'clipboard-read' || permission === 'clipboard-sanitized-write') {
+    const allowed = [
+      'clipboard-read',
+      'clipboard-sanitized-write',
+      'pointerLock',
+      'keyboardLock',
+    ];
+    if (allowed.includes(permission)) {
       callback(true);
     } else {
       callback(false);
@@ -193,10 +242,13 @@ app.whenReady().then(() => {
   });
 
   session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
-    if (permission === 'clipboard-read' || permission === 'clipboard-sanitized-write') {
-      return true;
-    }
-    return false;
+    const allowed = [
+      'clipboard-read',
+      'clipboard-sanitized-write',
+      'pointerLock',
+      'keyboardLock',
+    ];
+    return allowed.includes(permission);
   });
 
   createWindow();
@@ -212,12 +264,10 @@ app.whenReady().then(() => {
     if (!mainWindow) return;
 
     try {
-      // Ensure the window is visible and focused so capturePage succeeds
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
       mainWindow.focus();
 
-      // Small delay to let the compositor settle
       await new Promise((r) => setTimeout(r, 150));
 
       const image = await mainWindow.webContents.capturePage();
