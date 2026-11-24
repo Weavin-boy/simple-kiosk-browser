@@ -1,6 +1,6 @@
 {
   "name": "simple-kiosk-browser",
-  "version": "1.0.3",
+  "version": "1.0.3c",
   "description": "Minimal locked-down Chromium browser. Only title bar, locks to URL from config.json. Hotkeys: F11 fullscreen, F12 screenshot. Ctrl/Alt/Shift, clipboard, and pointer lock enabled.",
   "main": "main.js",
   "scripts": {
