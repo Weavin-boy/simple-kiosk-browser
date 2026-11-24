@@ -2,6 +2,8 @@
 
 A simple locked-down browser. It shows only the title bar and stays on one website.
 
+Built with [Electron](https://www.electronjs.org/).
+
 ## What it does
 - No address bar, tabs, bookmarks, or buttons
 - Locks to the website in `config.json`
