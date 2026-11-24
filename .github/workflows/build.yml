@@ -28,7 +28,7 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build portable app
         run: npm run build:win
@@ -67,7 +67,7 @@ jobs:
             SHA-256 of Locked-Browser-Portable.zip:
             `${{ steps.sha.outputs.sha256 }}`
 
-            **Full Changelog**: https://github.com/Weavin-boy/locked-browser/compare/${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || github.ref_name }}...HEAD
+            Security and correctness fixes from issue #1 (origin-based navigation, restricted permissions, secure favicon, config validation, Electron fuses, focused-only F11/F12, devTools disabled).
           files: dist/Locked-Browser-Portable.zip
           generate_release_notes: true
         env:
