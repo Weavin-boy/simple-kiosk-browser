@@ -218,7 +218,19 @@ app.whenReady().then(() => {
     if (!mainWindow) return;
 
     try {
+      // Ensure the window is visible and focused so capturePage succeeds
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+
+      // Small delay to let the compositor settle
+      await new Promise((r) => setTimeout(r, 150));
+
       const image = await mainWindow.webContents.capturePage();
+
+      if (image.isEmpty()) {
+        throw new Error('Captured image is empty (window may have been occluded or not ready)');
+      }
 
       let screenshotsDir;
       if (app.isPackaged) {
@@ -236,6 +248,8 @@ app.whenReady().then(() => {
 
       fs.writeFileSync(filePath, image.toPNG());
 
+      console.log('Screenshot saved to', filePath);
+
       dialog.showMessageBox(mainWindow, {
         type: 'info',
         title: 'Screenshot saved',
@@ -244,7 +258,7 @@ app.whenReady().then(() => {
       });
     } catch (err) {
       console.error('Screenshot failed:', err);
-      dialog.showErrorBox('Screenshot failed', err.message);
+      dialog.showErrorBox('Screenshot failed', err.message || String(err));
     }
   });
 
