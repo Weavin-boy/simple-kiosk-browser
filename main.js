@@ -83,14 +83,13 @@ function createWindow() {
       contextIsolation: true,
       sandbox: true,
       webSecurity: true,
-      enableBlinkFeatures: 'Gamepad', // ensure Gamepad API is available
+      enableBlinkFeatures: 'Gamepad',
     },
   });
 
   mainWindow.setMenu(null);
   mainWindow.loadURL(lockedUrl);
 
-  // Pull favicon and set it as the window icon / title bar icon
   mainWindow.webContents.on('page-favicon-updated', async (event, favicons) => {
     if (favicons && favicons.length > 0) {
       const icon = await downloadFavicon(favicons[0]);
@@ -121,7 +120,13 @@ function createWindow() {
   mainWindow.webContents.on('before-input-event', (event, input) => {
     const { key, control, alt, meta } = input;
 
+    // Always allow F11 and F12
     if (key === 'F11' || key === 'F12') {
+      return;
+    }
+
+    // Allow F1 and F3 to pass through to the page
+    if (key === 'F1' || key === 'F3') {
       return;
     }
 
@@ -129,8 +134,6 @@ function createWindow() {
       control || meta ||
       (alt && key !== 'F4') ||
       key === 'F5' ||
-      key === 'F1' ||
-      key === 'F3' ||
       key === 'F6' ||
       key === 'F7' ||
       key === 'F8' ||
@@ -142,7 +145,6 @@ function createWindow() {
     }
   });
 
-  // Inject controller / joystick support after page loads
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.webContents.executeJavaScript(`
       (function() {
@@ -151,17 +153,11 @@ function createWindow() {
           const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
           for (const gp of gamepads) {
             if (!gp) continue;
-            // Map common buttons:
-            // Button 0 (A / Cross) → F12 screenshot
-            // Button 1 (B / Circle) → F11 fullscreen
-            // Button 9 (Start) → F11 fullscreen
             const buttons = gp.buttons.map(b => b.pressed);
             if (buttons[0] && !lastButtons[0]) {
-              // A button → screenshot
               document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F12', keyCode: 123 }));
             }
             if ((buttons[1] || buttons[9]) && !(lastButtons[1] || lastButtons[9])) {
-              // B or Start → fullscreen
               document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F11', keyCode: 122 }));
             }
             lastButtons = buttons;
