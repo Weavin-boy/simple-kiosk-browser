@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder --publish never",
-    "build:win": "electron-builder --win --publish never"
+    "build:win": "electron-builder --win dir --publish never"
   },
   "author": "Weavin-boy",
   "license": "MIT",
@@ -27,12 +27,7 @@
     ],
     "publish": null,
     "win": {
-      "target": [
-        {
-          "target": "portable",
-          "arch": ["x64"]
-        }
-      ],
+      "target": "dir",
       "icon": null
     }
   }
