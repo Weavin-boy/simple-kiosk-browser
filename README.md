@@ -1,75 +1,80 @@
 # locked-browser
 
-Minimal locked-down Chromium-based browser (built with Electron).
+A minimal, locked-down Chromium-based browser (built with Electron). Ideal for kiosk-style or single-website use.
 
 ## Features
-- **Only the title bar** is shown (no address bar, bookmark bar, buttons, extensions, tabs, or menus)
-- Locks to a single website defined in `config.json` (sits next to the .exe)
-- Blocks almost all keyboard shortcuts (Ctrl+N, Ctrl+T, Ctrl+S, Ctrl+W, F5, etc.)
-- Allowed hotkeys only:
+- Shows **only the title bar** (no address bar, bookmarks, buttons, extensions, tabs, or menus)
+- Locks to a single website defined in `config.json` (placed next to the `.exe`)
+- Window icon updates to the website’s favicon
+- Blocks almost all keyboard shortcuts
+- Allowed hotkeys:
   - **F11** → Toggle fullscreen
-  - **F12** → Take a screenshot and save it to a `screenshots` folder next to the .exe
-- **Fully portable** — no installation required. Just unzip and run.
-- **Everything stays in the folder** — cache, cookies, logs, screenshots, and config never touch AppData or other system locations.
+  - **F12** → Screenshot (saved to a `screenshots` folder next to the `.exe`)
+- Controller / joystick support (Gamepad API + basic button mapping for fullscreen/screenshot)
+- **Fully portable** — no installation. Unzip and run.
+- All data stays inside the folder (nothing written to AppData)
 
-## Download Portable Version
+## Download the portable Windows version
 
-### Option 1: Automatic build via GitHub Actions (recommended)
+The easiest way is via GitHub Actions:
 1. Go to the [Actions](https://github.com/Weavin-boy/locked-browser/actions) tab.
-2. Click **Build Portable Windows App** on the left.
-3. Click **Run workflow** → **Run workflow**.
-4. Wait for it to finish, then download the **Locked-Browser-Portable** artifact.
-5. Unzip it. You will get a `Locked-Browser` folder.
-6. Edit `config.json` inside that folder if you want to change the locked website.
-7. Run `Locked Browser.exe`.
+2. Open the latest successful **Build Portable Windows App** run.
+3. Download the **Locked-Browser-Portable** artifact.
+4. Unzip it → you get a `Locked-Browser` folder.
+5. Edit `config.json` if needed, then run `Locked Browser.exe`.
 
-### Option 2: Create a tagged release
-Push a tag to trigger a release with the portable zip attached:
+You can also create a tagged release (see below) to attach the zip permanently.
+
+## Build it yourself on your computer
+
+This is a public project. Anyone can clone and build it.
+
+### Requirements
+- Node.js (v20 or later recommended)
+- Git
+- On Windows (for the portable `.exe` build)
+
+### Steps
+```bash
+git clone https://github.com/Weavin-boy/locked-browser.git
+cd locked-browser
+npm install
+```
+
+Edit `config.json`:
+```json
+{
+  "url": "https://your-website.com",
+  "title": "My Locked Browser"
+}
+```
+
+Run in development:
+```bash
+npm start
+```
+
+Build the portable Windows folder:
+```bash
+npm run build:win
+```
+The output is in `dist/win-unpacked/`. Zip that folder if you want to share it.
+
+### Create a release with the zip (optional)
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
-Then check the [Releases](https://github.com/Weavin-boy/locked-browser/releases) page.
+Then on the [Releases](https://github.com/Weavin-boy/locked-browser/releases) page you can upload the zip as an asset.
 
-## Folder layout (after first run)
+## Folder layout (portable)
 ```
 Locked-Browser/
   Locked Browser.exe
-  config.json          ← edit this to change the locked website
+  config.json          ← change the locked website here
   data/                ← all app data (cache, cookies, etc.)
-  screenshots/         ← F12 screenshots go here
+  screenshots/         ← F12 screenshots
   ...
 ```
-
-## Run from source
-
-1. Make sure you have Node.js installed.
-2. Clone the repo:
-   ```bash
-   git clone https://github.com/Weavin-boy/locked-browser.git
-   cd locked-browser
-   ```
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Edit `config.json` to set the website you want to lock onto:
-   ```json
-   {
-     "url": "https://your-website.com",
-     "title": "My Locked Browser"
-   }
-   ```
-5. Run it:
-   ```bash
-   npm start
-   ```
-
-## Build portable locally (Windows)
-```bash
-npm install
-npm run build:win
-```
-The portable files will be in `dist/win-unpacked/`.
 
 All settings and files stay inside the folder — completely self-contained.
