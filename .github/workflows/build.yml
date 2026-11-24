@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 21
 
       - name: Install dependencies
         run: npm install
@@ -67,7 +67,15 @@ jobs:
             SHA-256 of Locked-Browser-Portable.zip:
             `${{ steps.sha.outputs.sha256 }}`
 
-            Security and correctness fixes from issue #1 (origin-based navigation, restricted permissions, secure favicon, config validation, Electron fuses, focused-only F11/F12, devTools disabled).
+            Security and correctness fixes from issue #1:
+            - Origin-based navigation checks (will-navigate, will-redirect, will-frame-navigate)
+            - Permissions limited to the locked origin
+            - Secure favicon download (https only, size limit, timeout)
+            - config.json requires valid https:// URL
+            - Electron fuses enabled
+            - F11/F12 only active when window is focused
+            - devTools disabled
+            - Gamepad loop guarded against duplicates
           files: dist/Locked-Browser-Portable.zip
           generate_release_notes: true
         env:
