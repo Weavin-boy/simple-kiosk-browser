@@ -1,7 +1,7 @@
 {
   "name": "locked-browser",
   "version": "1.0.0",
-  "description": "Minimal locked-down Chromium browser. Only title bar, locks to URL from config.json. Hotkeys: F11 fullscreen, F12 screenshot.",
+  "description": "Minimal locked-down Chromium browser. Only title bar, locks to URL from config.json. Hotkeys: F11 fullscreen, F12 screenshot. Clipboard cut/copy/paste enabled.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

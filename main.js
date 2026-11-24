@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, dialog, nativeImage } = require('electron');
+const { app, BrowserWindow, globalShortcut, dialog, nativeImage, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
@@ -118,7 +118,7 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('before-input-event', (event, input) => {
-    const { key, control, alt, meta } = input;
+    const { key, control, alt, meta, shift } = input;
 
     // Always allow F11 and F12
     if (key === 'F11' || key === 'F12') {
@@ -127,6 +127,17 @@ function createWindow() {
 
     // Allow F1 and F3 to pass through to the page
     if (key === 'F1' || key === 'F3') {
+      return;
+    }
+
+    // Allow clipboard operations: Cut (X), Copy (C), Paste (V), Select All (A)
+    const isClipboardCombo = (control || meta) && ['c', 'v', 'x', 'a'].includes((key || '').toLowerCase());
+    if (isClipboardCombo) {
+      return;
+    }
+
+    // Allow common clipboard alternatives: Shift+Insert (paste), Ctrl+Insert (copy)
+    if ((shift && key === 'Insert') || (control && key === 'Insert')) {
       return;
     }
 
@@ -177,6 +188,23 @@ function createWindow() {
 
 app.whenReady().then(() => {
   loadConfig();
+
+  // Grant clipboard permissions so the locked page can use the Clipboard API
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'clipboard-read' || permission === 'clipboard-sanitized-write') {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+
+  session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
+    if (permission === 'clipboard-read' || permission === 'clipboard-sanitized-write') {
+      return true;
+    }
+    return false;
+  });
+
   createWindow();
 
   globalShortcut.register('F11', () => {

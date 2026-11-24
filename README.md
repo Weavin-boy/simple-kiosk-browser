@@ -9,7 +9,13 @@ Built with [Electron](https://www.electronjs.org/).
 - Locks to the website in `config.json`
 - F11 = fullscreen
 - F12 = screenshot (saved next to the app)
+- Ctrl/Cmd + C = Copy
+- Ctrl/Cmd + V = Paste
+- Ctrl/Cmd + X = Cut
+- Ctrl/Cmd + A = Select All
 - Fully portable — just unzip and run
+
+Clipboard access (Clipboard API) is enabled for the locked page.
 
 ## Download
 Get the latest Windows version here:
