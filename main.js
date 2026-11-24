@@ -1,9 +1,10 @@
-const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
+const { app, BrowserWindow, globalShortcut, dialog, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const http = require('http');
 
-// Force all app data (cache, cookies, GPU cache, etc.) into a local folder
-// so nothing is written to AppData or other system locations.
+// Force all app data into a local folder (fully portable)
 if (app.isPackaged) {
   const portableDir = path.dirname(process.execPath);
   const dataDir = path.join(portableDir, 'data');
@@ -46,6 +47,28 @@ function loadConfig() {
   }
 }
 
+function downloadFavicon(url) {
+  return new Promise((resolve) => {
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        resolve(null);
+        return;
+      }
+      const chunks = [];
+      res.on('data', (chunk) => chunks.push(chunk));
+      res.on('end', () => {
+        try {
+          const img = nativeImage.createFromBuffer(Buffer.concat(chunks));
+          resolve(img.isEmpty() ? null : img);
+        } catch {
+          resolve(null);
+        }
+      });
+    }).on('error', () => resolve(null));
+  });
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -60,11 +83,23 @@ function createWindow() {
       contextIsolation: true,
       sandbox: true,
       webSecurity: true,
+      enableBlinkFeatures: 'Gamepad', // ensure Gamepad API is available
     },
   });
 
   mainWindow.setMenu(null);
   mainWindow.loadURL(lockedUrl);
+
+  // Pull favicon and set it as the window icon / title bar icon
+  mainWindow.webContents.on('page-favicon-updated', async (event, favicons) => {
+    if (favicons && favicons.length > 0) {
+      const icon = await downloadFavicon(favicons[0]);
+      if (icon) {
+        mainWindow.setIcon(icon);
+        console.log('Set window icon from favicon');
+      }
+    }
+  });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (!url.startsWith(lockedUrl)) {
@@ -107,6 +142,38 @@ function createWindow() {
     }
   });
 
+  // Inject controller / joystick support after page loads
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.executeJavaScript(`
+      (function() {
+        let lastButtons = [];
+        function pollGamepad() {
+          const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+          for (const gp of gamepads) {
+            if (!gp) continue;
+            // Map common buttons:
+            // Button 0 (A / Cross) → F12 screenshot
+            // Button 1 (B / Circle) → F11 fullscreen
+            // Button 9 (Start) → F11 fullscreen
+            const buttons = gp.buttons.map(b => b.pressed);
+            if (buttons[0] && !lastButtons[0]) {
+              // A button → screenshot
+              document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F12', keyCode: 123 }));
+            }
+            if ((buttons[1] || buttons[9]) && !(lastButtons[1] || lastButtons[9])) {
+              // B or Start → fullscreen
+              document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F11', keyCode: 122 }));
+            }
+            lastButtons = buttons;
+          }
+          requestAnimationFrame(pollGamepad);
+        }
+        window.addEventListener('gamepadconnected', () => console.log('Gamepad connected'));
+        pollGamepad();
+      })();
+    `).catch(err => console.error('Failed to inject gamepad support:', err));
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -129,7 +196,6 @@ app.whenReady().then(() => {
     try {
       const image = await mainWindow.webContents.capturePage();
 
-      // Save screenshots inside the portable folder
       let screenshotsDir;
       if (app.isPackaged) {
         screenshotsDir = path.join(path.dirname(process.execPath), 'screenshots');
