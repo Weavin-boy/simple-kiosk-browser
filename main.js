@@ -1,20 +1,31 @@
 const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { shell } = require('electron');
 
 let mainWindow;
 let lockedUrl = 'https://example.com';
 let windowTitle = 'Locked Browser';
 
-// Load config
+// Load config (looks next to the .exe in production, or in the project folder in development)
 function loadConfig() {
   try {
-    const configPath = path.join(__dirname, 'config.json');
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    lockedUrl = config.url || lockedUrl;
-    windowTitle = config.title || windowTitle;
-    console.log('Loaded config:', { lockedUrl, windowTitle });
+    let configPath;
+    if (app.isPackaged) {
+      // Portable build: config.json sits next to the .exe
+      configPath = path.join(path.dirname(process.execPath), 'config.json');
+    } else {
+      // Development
+      configPath = path.join(__dirname, 'config.json');
+    }
+
+    if (fs.existsSync(configPath)) {
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      lockedUrl = config.url || lockedUrl;
+      windowTitle = config.title || windowTitle;
+      console.log('Loaded config from', configPath, { lockedUrl, windowTitle });
+    } else {
+      console.log('No config.json found at', configPath, '- using defaults');
+    }
   } catch (err) {
     console.error('Failed to load config.json, using defaults:', err.message);
   }
@@ -27,7 +38,6 @@ function createWindow() {
     title: windowTitle,
     autoHideMenuBar: true,
     menuBarVisible: false,
-    // Only title bar — no address bar, tabs, buttons, etc.
     frame: true,
     titleBarStyle: 'default',
     webPreferences: {
@@ -38,13 +48,9 @@ function createWindow() {
     },
   });
 
-  // Remove application menu completely
   mainWindow.setMenu(null);
-
-  // Load the locked URL
   mainWindow.loadURL(lockedUrl);
 
-  // Prevent navigation away from the locked URL
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (!url.startsWith(lockedUrl)) {
       event.preventDefault();
@@ -58,25 +64,21 @@ function createWindow() {
     }
   });
 
-  // Block new windows / tabs
   mainWindow.webContents.setWindowOpenHandler(() => {
     return { action: 'deny' };
   });
 
-  // Disable most keyboard shortcuts, allow only F11 and F12
   mainWindow.webContents.on('before-input-event', (event, input) => {
-    const { key, control, alt, meta, shift } = input;
+    const { key, control, alt, meta } = input;
 
-    // Allow F11 (fullscreen) and F12 (screenshot)
     if (key === 'F11' || key === 'F12') {
-      return; // let it through, we'll handle it globally
+      return;
     }
 
-    // Block common shortcuts
     const blocked =
-      control || meta || // Ctrl / Cmd
-      (alt && key !== 'F4') || // Alt (except Alt+F4 for close on Windows)
-      key === 'F5' || // refresh
+      control || meta ||
+      (alt && key !== 'F4') ||
+      key === 'F5' ||
       key === 'F1' ||
       key === 'F3' ||
       key === 'F6' ||
@@ -95,12 +97,10 @@ function createWindow() {
   });
 }
 
-// Global shortcuts for F11 and F12 (more reliable)
 app.whenReady().then(() => {
   loadConfig();
   createWindow();
 
-  // F11 — toggle fullscreen
   globalShortcut.register('F11', () => {
     if (mainWindow) {
       const isFull = mainWindow.isFullScreen();
@@ -108,7 +108,6 @@ app.whenReady().then(() => {
     }
   });
 
-  // F12 — screenshot to Downloads
   globalShortcut.register('F12', async () => {
     if (!mainWindow) return;
 
@@ -121,7 +120,6 @@ app.whenReady().then(() => {
 
       fs.writeFileSync(filePath, image.toPNG());
 
-      // Optional: show a brief notification-style dialog (or remove if you want silent)
       dialog.showMessageBox(mainWindow, {
         type: 'info',
         title: 'Screenshot saved',
