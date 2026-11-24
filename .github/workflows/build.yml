@@ -37,16 +37,17 @@ jobs:
           name: Locked-Browser-Portable
           path: dist/output
 
-      - name: Zip for release (only if tagging)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Zip for release
         run: |
           Compress-Archive -Path "dist\output\Locked-Browser" -DestinationPath "dist\Locked-Browser-Portable.zip" -Force
         shell: pwsh
 
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v1.0.0
+          name: Locked Browser v1.0.0
           files: dist/Locked-Browser-Portable.zip
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
