@@ -130,20 +130,14 @@ function createWindow() {
       return;
     }
 
-    // Allow clipboard operations: Cut (X), Copy (C), Paste (V), Select All (A)
-    const isClipboardCombo = (control || meta) && ['c', 'v', 'x', 'a'].includes((key || '').toLowerCase());
-    if (isClipboardCombo) {
+    // Allow all Ctrl/Cmd, Alt, and Shift (and combinations) so the page receives them
+    // This enables clipboard shortcuts, page shortcuts, and modifier keys
+    if (control || meta || alt || shift) {
       return;
     }
 
-    // Allow common clipboard alternatives: Shift+Insert (paste), Ctrl+Insert (copy)
-    if ((shift && key === 'Insert') || (control && key === 'Insert')) {
-      return;
-    }
-
+    // Still block bare function keys that could refresh or escape the lock
     const blocked =
-      control || meta ||
-      (alt && key !== 'F4') ||
       key === 'F5' ||
       key === 'F6' ||
       key === 'F7' ||
