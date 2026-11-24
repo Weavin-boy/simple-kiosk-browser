@@ -22,8 +22,13 @@
     },
     "files": [
       "main.js",
-      "config.json",
       "package.json"
+    ],
+    "extraFiles": [
+      {
+        "from": "config.json",
+        "to": "config.json"
+      }
     ],
     "publish": null,
     "win": {
