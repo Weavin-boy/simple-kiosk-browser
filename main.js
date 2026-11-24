@@ -2,19 +2,34 @@ const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
+// Force all app data (cache, cookies, GPU cache, etc.) into a local folder
+// so nothing is written to AppData or other system locations.
+if (app.isPackaged) {
+  const portableDir = path.dirname(process.execPath);
+  const dataDir = path.join(portableDir, 'data');
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    app.setPath('userData', dataDir);
+    app.setPath('sessionData', path.join(dataDir, 'session'));
+    app.setPath('logs', path.join(dataDir, 'logs'));
+    app.setPath('crashDumps', path.join(dataDir, 'crashDumps'));
+  } catch (e) {
+    console.error('Could not set portable data paths:', e);
+  }
+}
+
 let mainWindow;
 let lockedUrl = 'https://example.com';
 let windowTitle = 'Locked Browser';
 
-// Load config (looks next to the .exe in production, or in the project folder in development)
 function loadConfig() {
   try {
     let configPath;
     if (app.isPackaged) {
-      // Portable build: config.json sits next to the .exe
       configPath = path.join(path.dirname(process.execPath), 'config.json');
     } else {
-      // Development
       configPath = path.join(__dirname, 'config.json');
     }
 
@@ -113,10 +128,21 @@ app.whenReady().then(() => {
 
     try {
       const image = await mainWindow.webContents.capturePage();
-      const downloadsPath = app.getPath('downloads');
+
+      // Save screenshots inside the portable folder
+      let screenshotsDir;
+      if (app.isPackaged) {
+        screenshotsDir = path.join(path.dirname(process.execPath), 'screenshots');
+      } else {
+        screenshotsDir = path.join(__dirname, 'screenshots');
+      }
+      if (!fs.existsSync(screenshotsDir)) {
+        fs.mkdirSync(screenshotsDir, { recursive: true });
+      }
+
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `screenshot-${timestamp}.png`;
-      const filePath = path.join(downloadsPath, filename);
+      const filePath = path.join(screenshotsDir, filename);
 
       fs.writeFileSync(filePath, image.toPNG());
 
