@@ -1,4 +1,5 @@
 {
   "url": "https://example.com",
-  "title": "Locked Browser"
+  "title": "Locked Browser",
+  "allowExternalNavigation": false
 }

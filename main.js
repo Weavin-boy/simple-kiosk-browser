@@ -23,6 +23,7 @@ if (app.isPackaged) {
 let mainWindow;
 let lockedUrl = 'https://example.com';
 let windowTitle = 'Simple Kiosk Browser';
+let allowExternalNavigation = false;
 
 function isValidHttpsUrl(url) {
   try {
@@ -33,9 +34,37 @@ function isValidHttpsUrl(url) {
   }
 }
 
+// Extract a rough root domain (eTLD+1). Handles common multi-part TLDs.
+function getRootDomain(hostname) {
+  const parts = hostname.toLowerCase().split('.').filter(Boolean);
+  if (parts.length <= 2) return parts.join('.');
+
+  const multiPartTlds = new Set([
+    'co.uk', 'org.uk', 'ac.uk', 'gov.uk',
+    'com.au', 'net.au', 'org.au',
+    'co.jp', 'ne.jp', 'or.jp',
+    'com.br', 'net.br', 'org.br',
+    'co.nz', 'org.nz',
+    'com.mx', 'org.mx',
+    'co.za', 'org.za',
+    'com.ar', 'org.ar',
+    'co.in', 'net.in',
+  ]);
+
+  const lastTwo = parts.slice(-2).join('.');
+  if (multiPartTlds.has(lastTwo) && parts.length >= 3) {
+    return parts.slice(-3).join('.');
+  }
+  return lastTwo;
+}
+
 function isAllowedUrl(url) {
+  if (allowExternalNavigation) return true;
   try {
-    return new URL(url).origin === new URL(lockedUrl).origin;
+    const target = new URL(url);
+    const locked = new URL(lockedUrl);
+    if (target.protocol !== 'https:') return false;
+    return getRootDomain(target.hostname) === getRootDomain(locked.hostname);
   } catch {
     return false;
   }
@@ -59,7 +88,8 @@ function loadConfig() {
         console.error('config.json url must be a valid https:// URL, using default');
       }
       windowTitle = config.title || windowTitle;
-      console.log('Loaded config from', configPath, { lockedUrl, windowTitle });
+      allowExternalNavigation = config.allowExternalNavigation === true;
+      console.log('Loaded config from', configPath, { lockedUrl, windowTitle, allowExternalNavigation });
     } else {
       console.log('No config.json found at', configPath, '- using defaults');
     }
