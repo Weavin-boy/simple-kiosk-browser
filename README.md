@@ -10,7 +10,23 @@ Minimal locked-down Chromium-based browser (built with Electron).
   - **F11** → Toggle fullscreen
   - **F12** → Take a screenshot and save it to your Downloads folder
 
-## Setup
+## Download Windows EXE
+
+### Option 1: Automatic build via GitHub Actions (recommended)
+1. Go to the [Actions](https://github.com/Weavin-boy/locked-browser/actions) tab.
+2. Click **Build Windows EXE** on the left.
+3. Click **Run workflow** → **Run workflow**.
+4. Wait for it to finish, then download the artifact (or check Releases if a tag was used).
+
+### Option 2: Create a tagged release
+Push a tag to trigger a release with the EXE attached:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+Then check the [Releases](https://github.com/Weavin-boy/locked-browser/releases) page.
+
+## Run from source
 
 1. Make sure you have Node.js installed.
 2. Clone the repo:
@@ -34,9 +50,11 @@ Minimal locked-down Chromium-based browser (built with Electron).
    npm start
    ```
 
-## Building a standalone app (optional)
+## Build locally (Windows)
 ```bash
-npm run build
+npm install
+npm run build:win
 ```
+The installer will be in the `dist/` folder.
 
-The browser will open in a window with only a title bar and stay locked to the URL in `config.json`.
+The browser opens with only a title bar and stays locked to the URL in `config.json`.
