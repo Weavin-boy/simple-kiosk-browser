@@ -27,20 +27,20 @@ jobs:
 
       - name: Create clean folder structure
         run: |
-          New-Item -ItemType Directory -Path "dist\Locked-Browser" -Force | Out-Null
-          Copy-Item -Path "dist\win-unpacked\*" -Destination "dist\Locked-Browser\" -Recurse -Force
+          New-Item -ItemType Directory -Path "dist\output\Locked-Browser" -Force | Out-Null
+          Copy-Item -Path "dist\win-unpacked\*" -Destination "dist\output\Locked-Browser\" -Recurse -Force
         shell: pwsh
 
-      - name: Upload artifact (folder only — no nested zip)
+      - name: Upload artifact (zip > Locked-Browser folder > files)
         uses: actions/upload-artifact@v4
         with:
           name: Locked-Browser-Portable
-          path: dist/Locked-Browser
+          path: dist/output
 
       - name: Zip for release (only if tagging)
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          Compress-Archive -Path "dist\Locked-Browser" -DestinationPath "dist\Locked-Browser-Portable.zip" -Force
+          Compress-Archive -Path "dist\output\Locked-Browser" -DestinationPath "dist\Locked-Browser-Portable.zip" -Force
         shell: pwsh
 
       - name: Create Release
