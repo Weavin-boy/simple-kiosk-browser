@@ -9,17 +9,19 @@ Minimal locked-down Chromium-based browser (built with Electron).
 - Allowed hotkeys only:
   - **F11** → Toggle fullscreen
   - **F12** → Take a screenshot and save it to your Downloads folder
+- **Fully portable** — no installation required. Just unzip and run.
 
-## Download Windows EXE
+## Download Portable Version
 
 ### Option 1: Automatic build via GitHub Actions (recommended)
 1. Go to the [Actions](https://github.com/Weavin-boy/locked-browser/actions) tab.
-2. Click **Build Windows EXE** on the left.
+2. Click **Build Portable Windows App** on the left.
 3. Click **Run workflow** → **Run workflow**.
-4. Wait for it to finish, then download the artifact (or check Releases if a tag was used).
+4. Wait for it to finish, then download the **Locked-Browser-Portable** artifact.
+5. Unzip it anywhere and run `Locked Browser.exe`.
 
 ### Option 2: Create a tagged release
-Push a tag to trigger a release with the EXE attached:
+Push a tag to trigger a release with the portable zip attached:
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
@@ -50,11 +52,11 @@ Then check the [Releases](https://github.com/Weavin-boy/locked-browser/releases)
    npm start
    ```
 
-## Build locally (Windows)
+## Build portable locally (Windows)
 ```bash
 npm install
 npm run build:win
 ```
-The installer will be in the `dist/` folder.
+The portable files will be in `dist/win-unpacked/`. You can zip that folder yourself.
 
-The browser opens with only a title bar and stays locked to the URL in `config.json`.
+All settings and files stay inside the folder — completely self-contained.
