@@ -1,4 +1,4 @@
-# Locked Browser
+# Simple Kiosk Browser
 
 A simple locked-down browser. It shows only the title bar and stays on one website.
 
@@ -24,9 +24,11 @@ Get the latest Windows version here:
 
 **https://github.com/Weavin-boy/locked-browser/releases**
 
+(After renaming the repo, this link will redirect to the new name.)
+
 Each release includes a SHA-256 of the zip so you can verify the download.
 
-Unzip the file, edit `config.json` (must be a valid `https://` URL), then run `Locked Browser.exe`.
+Unzip the file, edit `config.json` (must be a valid `https://` URL), then run `Simple Kiosk Browser.exe`.
 
 The app does not auto-update. Check the releases page for new builds.
 
@@ -39,7 +41,7 @@ The app does not auto-update. Check the releases page for new builds.
    ```
 3. Install and run:
    ```bash
-   npm ci
+   npm install
    npm start
    ```
 4. To make the portable Windows build:

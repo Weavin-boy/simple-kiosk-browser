@@ -22,7 +22,7 @@ if (app.isPackaged) {
 
 let mainWindow;
 let lockedUrl = 'https://example.com';
-let windowTitle = 'Locked Browser';
+let windowTitle = 'Simple Kiosk Browser';
 
 function isValidHttpsUrl(url) {
   try {

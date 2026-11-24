@@ -1,5 +1,5 @@
 {
-  "name": "locked-browser",
+  "name": "simple-kiosk-browser",
   "version": "1.0.3",
   "description": "Minimal locked-down Chromium browser. Only title bar, locks to URL from config.json. Hotkeys: F11 fullscreen, F12 screenshot. Ctrl/Alt/Shift, clipboard, and pointer lock enabled.",
   "main": "main.js",
@@ -15,8 +15,8 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.weavin.lockedbrowser",
-    "productName": "Locked Browser",
+    "appId": "com.weavin.simplekioskbrowser",
+    "productName": "Simple Kiosk Browser",
     "directories": {
       "output": "dist"
     },
