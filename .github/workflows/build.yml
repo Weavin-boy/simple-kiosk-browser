@@ -25,9 +25,11 @@ jobs:
       - name: Build portable app
         run: npm run build:win
 
-      - name: Zip portable folder
+      - name: Create clean folder structure
         run: |
-          Compress-Archive -Path "dist\win-unpacked\*" -DestinationPath "dist\Locked-Browser-Portable.zip" -Force
+          New-Item -ItemType Directory -Path "dist\Locked-Browser" -Force | Out-Null
+          Copy-Item -Path "dist\win-unpacked\*" -Destination "dist\Locked-Browser\" -Recurse -Force
+          Compress-Archive -Path "dist\Locked-Browser" -DestinationPath "dist\Locked-Browser-Portable.zip" -Force
         shell: pwsh
 
       - name: Upload artifact
