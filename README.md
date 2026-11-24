@@ -14,7 +14,7 @@ Get the latest Windows version here:
 
 **https://github.com/Weavin-boy/locked-browser/releases**
 
-Unzip the file, edit `config.json` if you want a different website, then run `Locked Browser.exe`.
+Unzip the file, edit `config.json`, then run `Locked Browser.exe`.
 
 ## Build it yourself
 1. Install Node.js
