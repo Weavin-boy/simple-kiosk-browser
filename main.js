@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, nativeImage, session } = require('electron');
+const { app, BrowserWindow, Notification, nativeImage, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
@@ -173,15 +173,20 @@ async function takeScreenshot() {
     fs.writeFileSync(filePath, image.toPNG());
     console.log('Screenshot saved to', filePath);
 
-    dialog.showMessageBox(mainWindow, {
-      type: 'info',
-      title: 'Screenshot saved',
-      message: `Saved to:\n${filePath}`,
-      buttons: ['OK'],
-    });
+    if (Notification.isSupported()) {
+      new Notification({
+        title: 'Screenshot saved',
+        body: `Saved to:\n${filePath}`,
+      }).show();
+    }
   } catch (err) {
     console.error('Screenshot failed:', err);
-    dialog.showErrorBox('Screenshot failed', err.message || String(err));
+    if (Notification.isSupported()) {
+      new Notification({
+        title: 'Screenshot failed',
+        body: err.message || String(err),
+      }).show();
+    }
   }
 }
 

@@ -16,11 +16,11 @@ It shows only the title bar and stays on that site (or the same domain, includin
 - Unzip and run — no install needed
 
 ## Download
-Latest Windows build (v1.0.4):
+Latest Windows build (v1.0.4a):
 
-**https://github.com/Weavin-boy/simple-kiosk-browser/releases/download/v1.0.4/Simple-Kiosk-Browser-Portable.zip**
+**https://github.com/Weavin-boy/simple-kiosk-browser/releases/download/v1.0.4a/Simple-Kiosk-Browser-Portable.zip**
 
-SHA-256: `cc9829d31052982aa2190a50590f593858cf912eef318321257b6ee7ab00025e`
+SHA-256: `(will be updated after release)`
 
 Unzip, edit `config.json` with your site, then run `Simple Kiosk Browser.exe`.
 
