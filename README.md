@@ -20,7 +20,7 @@ Latest Windows build (v1.0.4a):
 
 **https://github.com/Weavin-boy/simple-kiosk-browser/releases/download/v1.0.4a/Simple-Kiosk-Browser-Portable.zip**
 
-SHA-256: `(will be updated after release)`
+SHA-256: `ca06ff36a55c23375d98909d4224d2f9c7fe176368e66075dc800a2854c08b9b`
 
 Unzip, edit `config.json` with your site, then run `Simple Kiosk Browser.exe`.
 
